@@ -1,5 +1,10 @@
 package com.apartmentsystem.operations.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class CreateMaintenanceRequestDTO {
 
     private Long unitId;
