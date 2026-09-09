@@ -1,9 +1,14 @@
 package com.apartmentsystem.operations.Service;
 
 import com.apartmentsystem.operations.dto.CreateMaintenanceRequestDTO;
+import com.apartmentsystem.operations.dto.MaintenanceRequestResponseDTO;
 import com.apartmentsystem.operations.entity.MaintenanceRequest;
+import com.apartmentsystem.operations.entity.MaintenanceRequestStatus;
 import com.apartmentsystem.operations.repository.MaintenanceRequestRepository;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class MaintenanceRequestService {
@@ -14,6 +19,7 @@ public class MaintenanceRequestService {
         this.maintenanceRequestRepository = maintenanceRequestRepository;
     }
 
+    // Create a maintenance request
     public MaintenanceRequest createRequest(CreateMaintenanceRequestDTO dto) {
 
         MaintenanceRequest request = new MaintenanceRequest();
@@ -24,6 +30,34 @@ public class MaintenanceRequestService {
         request.setDescription(dto.getDescription());
         request.setAttachmentUrl(dto.getAttachmentUrl());
 
+        // System-controlled fields
+        request.setStatus(MaintenanceRequestStatus.SUBMITTED);
+
+        LocalDateTime now = LocalDateTime.now();
+        request.setCreatedAt(now);
+        request.setUpdatedAt(now);
+
         return maintenanceRequestRepository.save(request);
+    }
+
+    // Get all maintenance requests
+    public List<MaintenanceRequestResponseDTO> getAllRequests() {
+
+        return maintenanceRequestRepository.findAll()
+                .stream()
+                .map(request -> {
+                    MaintenanceRequestResponseDTO response =
+                            new MaintenanceRequestResponseDTO();
+
+                    response.setId(request.getId());
+                    response.setStatus(request.getStatus());
+                    response.setCategory(request.getCategory());
+                    response.setPriority(request.getPriority());
+                    response.setDescription(request.getDescription());
+                    response.setCreatedAt(request.getCreatedAt());
+
+                    return response;
+                })
+                .toList();
     }
 }
