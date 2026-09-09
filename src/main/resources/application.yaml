@@ -6,7 +6,17 @@ spring:
     url: jdbc:mysql://localhost:3307/operations_db
     username: root
     password: ${DB_PASSWORD}
+
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+  security:
+    user:
+      name: admin
+      password: admin123
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
