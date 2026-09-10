@@ -1,8 +1,9 @@
 package com.apartmentsystem.operations.controller;
 
+import com.apartmentsystem.operations.Service.MaintenanceRequestService;
 import com.apartmentsystem.operations.dto.CreateMaintenanceRequestDTO;
 import com.apartmentsystem.operations.dto.MaintenanceRequestResponseDTO;
-import com.apartmentsystem.operations.Service.MaintenanceRequestService;
+import com.apartmentsystem.operations.entity.MaintenanceRequestStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,11 +28,16 @@ public class MaintenanceRequestController {
         return maintenanceRequestService.createRequest(dto);
     }
 
-    // GET - Get all maintenance requests
+    // GET - Get all or filtered maintenance requests
     @GetMapping
-    public List<MaintenanceRequestResponseDTO> getAllRequests() {
+    public List<MaintenanceRequestResponseDTO> getAllRequests(
+            @RequestParam(required = false) MaintenanceRequestStatus status,
+            @RequestParam(required = false) String priority) {
 
-        return maintenanceRequestService.getAllRequests();
+        return maintenanceRequestService.getFilteredRequests(
+                status,
+                priority
+        );
     }
 
     // GET - Get one maintenance request by ID
