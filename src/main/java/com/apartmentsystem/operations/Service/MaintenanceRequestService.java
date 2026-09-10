@@ -20,7 +20,7 @@ public class MaintenanceRequestService {
     }
 
     // Create a maintenance request
-    public MaintenanceRequest createRequest(CreateMaintenanceRequestDTO dto) {
+    public MaintenanceRequestResponseDTO createRequest(CreateMaintenanceRequestDTO dto) {
 
         MaintenanceRequest request = new MaintenanceRequest();
 
@@ -37,7 +37,12 @@ public class MaintenanceRequestService {
         request.setCreatedAt(now);
         request.setUpdatedAt(now);
 
-        return maintenanceRequestRepository.save(request);
+        // Save to database
+        MaintenanceRequest savedRequest =
+                maintenanceRequestRepository.save(request);
+
+        // Convert Entity → Response DTO
+        return convertToResponseDTO(savedRequest);
     }
 
     // Get all maintenance requests
@@ -45,19 +50,7 @@ public class MaintenanceRequestService {
 
         return maintenanceRequestRepository.findAll()
                 .stream()
-                .map(request -> {
-                    MaintenanceRequestResponseDTO response =
-                            new MaintenanceRequestResponseDTO();
-
-                    response.setId(request.getId());
-                    response.setStatus(request.getStatus());
-                    response.setCategory(request.getCategory());
-                    response.setPriority(request.getPriority());
-                    response.setDescription(request.getDescription());
-                    response.setCreatedAt(request.getCreatedAt());
-
-                    return response;
-                })
+                .map(this::convertToResponseDTO)
                 .toList();
     }
 
@@ -65,7 +58,15 @@ public class MaintenanceRequestService {
     public MaintenanceRequestResponseDTO getRequestById(Long id) {
 
         MaintenanceRequest request = maintenanceRequestRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Maintenance request not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("Maintenance request not found"));
+
+        return convertToResponseDTO(request);
+    }
+
+    // Convert Entity → Response DTO
+    private MaintenanceRequestResponseDTO convertToResponseDTO(
+            MaintenanceRequest request) {
 
         MaintenanceRequestResponseDTO response =
                 new MaintenanceRequestResponseDTO();
