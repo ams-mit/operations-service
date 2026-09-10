@@ -15,12 +15,15 @@ public class MaintenanceRequestService {
 
     private final MaintenanceRequestRepository maintenanceRequestRepository;
 
-    public MaintenanceRequestService(MaintenanceRequestRepository maintenanceRequestRepository) {
+    public MaintenanceRequestService(
+            MaintenanceRequestRepository maintenanceRequestRepository) {
+
         this.maintenanceRequestRepository = maintenanceRequestRepository;
     }
 
     // Create a maintenance request
-    public MaintenanceRequestResponseDTO createRequest(CreateMaintenanceRequestDTO dto) {
+    public MaintenanceRequestResponseDTO createRequest(
+            CreateMaintenanceRequestDTO dto) {
 
         MaintenanceRequest request = new MaintenanceRequest();
 
@@ -57,11 +60,49 @@ public class MaintenanceRequestService {
     // Get one maintenance request by ID
     public MaintenanceRequestResponseDTO getRequestById(Long id) {
 
-        MaintenanceRequest request = maintenanceRequestRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Maintenance request not found"));
+        MaintenanceRequest request =
+                maintenanceRequestRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Maintenance request not found"));
 
         return convertToResponseDTO(request);
+    }
+
+    // Filter maintenance requests by status and/or priority
+    public List<MaintenanceRequestResponseDTO> getFilteredRequests(
+            MaintenanceRequestStatus status,
+            String priority) {
+
+        List<MaintenanceRequest> requests;
+
+        if (status != null && priority != null) {
+
+            // Filter by both status and priority
+            requests = maintenanceRequestRepository
+                    .findByStatusAndPriority(status, priority);
+
+        } else if (status != null) {
+
+            // Filter by status only
+            requests = maintenanceRequestRepository
+                    .findByStatus(status);
+
+        } else if (priority != null) {
+
+            // Filter by priority only
+            requests = maintenanceRequestRepository
+                    .findByPriority(priority);
+
+        } else {
+
+            // No filters → get all requests
+            requests = maintenanceRequestRepository.findAll();
+        }
+
+        return requests.stream()
+                .map(this::convertToResponseDTO)
+                .toList();
     }
 
     // Convert Entity → Response DTO
