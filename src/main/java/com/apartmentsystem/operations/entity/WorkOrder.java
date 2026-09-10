@@ -23,7 +23,7 @@ public class WorkOrder {
     private LocalDate scheduledDate;
 
     @Enumerated(EnumType.STRING)
-    private WorkOrder status;
+    private WorkOrderStatus status;
 
     private String resolutionNotes;
 }
