@@ -60,4 +60,23 @@ public class MaintenanceRequestService {
                 })
                 .toList();
     }
+
+    // Get one maintenance request by ID
+    public MaintenanceRequestResponseDTO getRequestById(Long id) {
+
+        MaintenanceRequest request = maintenanceRequestRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Maintenance request not found"));
+
+        MaintenanceRequestResponseDTO response =
+                new MaintenanceRequestResponseDTO();
+
+        response.setId(request.getId());
+        response.setStatus(request.getStatus());
+        response.setCategory(request.getCategory());
+        response.setPriority(request.getPriority());
+        response.setDescription(request.getDescription());
+        response.setCreatedAt(request.getCreatedAt());
+
+        return response;
+    }
 }
