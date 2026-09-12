@@ -2,23 +2,21 @@ package com.apartmentsystem.operations.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.security.PublicKey;
 import java.security.KeyFactory;
+import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.List;
@@ -26,8 +24,20 @@ import java.util.List;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    @Value("${jwt.gateway-public-key}")
+    @Value("${jwt.gateway-public-key:}")
     private String gatewayPublicKey;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+
+        String path = request.getServletPath();
+
+        return path.equals("/actuator/health")
+                || path.equals("/actuator/info")
+                || path.equals("/health")
+                || path.startsWith("/swagger-ui")
+                || path.startsWith("/v3/api-docs");
+    }
 
     @Override
     protected void doFilterInternal(
@@ -38,29 +48,37 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String authorizationHeader = request.getHeader("Authorization");
 
-        // 1. Check Authorization header
-        if (authorizationHeader == null ||
-                !authorizationHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
+        // No JWT
+        if (authorizationHeader == null
+                || !authorizationHeader.startsWith("Bearer ")) {
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        // Gateway public key not configured yet
+        if (gatewayPublicKey == null || gatewayPublicKey.isBlank()) {
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
         try {
 
-            // 2. Extract JWT
+            // 1. Extract JWT
             String token = authorizationHeader.substring(7);
 
-            // 3. Convert Gateway public key
+            // 2. Convert Gateway public key
             PublicKey publicKey = parsePublicKey(gatewayPublicKey);
 
-            // 4. Verify JWT
+            // 3. Verify JWT using Gateway public key
             Claims claims = Jwts.parser()
                     .verifyWith(publicKey)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
 
-            // 5. Check token type
+            // 4. Check token type
             String type = claims.get("type", String.class);
 
             if (!"user".equals(type) && !"service".equals(type)) {
@@ -68,10 +86,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
 
-            // 6. Get subject
+            // 5. Get subject (user ID or service name)
             String subject = claims.getSubject();
 
-            // 7. Get roles
+            if (subject == null || subject.isBlank()) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
+            // 6. Get roles
             List<SimpleGrantedAuthority> authorities = List.of();
 
             if ("user".equals(type)) {
@@ -80,12 +103,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 if (roles != null) {
                     authorities = roles.stream()
-                            .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                            .map(role -> new SimpleGrantedAuthority(
+                                    "ROLE_" + role.toString()
+                            ))
                             .toList();
                 }
             }
 
-            // 8. Create authenticated user
+            // 7. Create authenticated user
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             subject,
@@ -93,11 +118,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                             authorities
                     );
 
-            // 9. Store authentication in Spring Security
+            // 8. Store authentication in Spring Security
             SecurityContextHolder.getContext()
                     .setAuthentication(authentication);
 
-            // 10. Continue to controller
+            // 9. Continue to controller
             filterChain.doFilter(request, response);
 
         } catch (Exception e) {
@@ -110,14 +135,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private PublicKey parsePublicKey(String pemPublicKey) throws Exception {
+
         String encodedKey = pemPublicKey
                 .replace("-----BEGIN PUBLIC KEY-----", "")
                 .replace("-----END PUBLIC KEY-----", "")
                 .replaceAll("\\s", "");
 
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(
-                Base64.getDecoder().decode(encodedKey));
+        byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
 
-        return KeyFactory.getInstance("RSA").generatePublic(keySpec);
+        X509EncodedKeySpec keySpec =
+                new X509EncodedKeySpec(decodedKey);
+
+        return KeyFactory
+                .getInstance("RSA")
+                .generatePublic(keySpec);
     }
 }

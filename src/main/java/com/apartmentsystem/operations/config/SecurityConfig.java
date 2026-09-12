@@ -3,7 +3,6 @@ package com.apartmentsystem.operations.config;
 import com.apartmentsystem.operations.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
@@ -25,6 +24,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
 
                 .authorizeHttpRequests(auth -> auth
+
                         // Swagger / OpenAPI
                         .requestMatchers(
                                 "/swagger-ui.html",
@@ -33,15 +33,20 @@ public class SecurityConfig {
                                 "/v3/api-docs.yaml"
                         ).permitAll()
 
-                        // Health check
-                        .requestMatchers("/health").permitAll()
+                        // Actuator health / info
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/info"
+                        ).permitAll()
 
                         // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
 
-                .httpBasic(Customizer.withDefaults())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(
+                        jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }
