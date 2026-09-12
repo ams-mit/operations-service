@@ -20,3 +20,13 @@ spring:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+jwt:
+  algorithm: ${JWT_ALGORITHM:RS256}
+  gateway-public-key: ${GATEWAY_JWT_PUBLIC_KEY}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
