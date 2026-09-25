@@ -8,6 +8,7 @@ import lombok.Setter;
 public class CreateMaintenanceRequestDTO {
 
     private Long unitId;
+    private Long requestedByUserId;
     private String category;
     private String priority;
     private String description;

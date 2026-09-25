@@ -59,6 +59,10 @@ public class WorkOrderService {
         // Initial status
         workOrder.setStatus(WorkOrderStatus.ASSIGNED);
 
+        // Update the maintenance request status so it's not SUBMITTED anymore
+        maintenanceRequest.setStatus(MaintenanceRequestStatus.ASSIGNED);
+        maintenanceRequestRepository.save(maintenanceRequest);
+
         // Save WorkOrder
         WorkOrder savedWorkOrder =
                 workOrderRepository.save(workOrder);
@@ -102,6 +106,18 @@ public class WorkOrderService {
 
         WorkOrder updatedWorkOrder =
                 workOrderRepository.save(workOrder);
+
+        // Update parent maintenance request if work order is closed
+        if (newStatus == WorkOrderStatus.CLOSED) {
+            MaintenanceRequest request = maintenanceRequestRepository
+                    .findById(workOrder.getMaintenanceRequestId())
+                    .orElse(null);
+            
+            if (request != null) {
+                request.setStatus(MaintenanceRequestStatus.CLOSED);
+                maintenanceRequestRepository.save(request);
+            }
+        }
 
         return convertToResponseDTO(updatedWorkOrder);
     }

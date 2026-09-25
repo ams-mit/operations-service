@@ -11,9 +11,13 @@ import java.time.LocalDateTime;
 public class MaintenanceRequestResponseDTO {
 
     private Long id;
+    private Long unitId;
+    private Long requestedByUserId;
+    private String attachmentUrl;
     private MaintenanceRequestStatus status;
     private String category;
     private String priority;
     private String description;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
