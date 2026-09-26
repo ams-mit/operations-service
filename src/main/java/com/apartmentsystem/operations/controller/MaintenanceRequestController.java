@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/maintenance-requests")
@@ -39,6 +40,7 @@ public class MaintenanceRequestController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
+    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER')")
     public MaintenanceRequestResponseDTO createRequest(
             @RequestBody CreateMaintenanceRequestDTO dto) {
 
@@ -58,6 +60,7 @@ public class MaintenanceRequestController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
+    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER', 'COORDINATOR', 'MANAGER')")
     public List<MaintenanceRequestResponseDTO> getAllRequests(
             @RequestParam(required = false) MaintenanceRequestStatus status,
             @RequestParam(required = false) String priority,
@@ -65,16 +68,10 @@ public class MaintenanceRequestController {
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size) {
 
-        if (page != null || size != null) {
-            Pageable pageable = PageRequest.of(page == null ? 0 : page, size == null ? 10 : size);
-            return maintenanceRequestService.getFilteredRequests(status, priority, category, pageable);
-        }
-
-        if (category != null) {
-            return maintenanceRequestService.getFilteredRequests(status, priority, category,
-                    Pageable.unpaged());
-        }
-        return maintenanceRequestService.getFilteredRequests(status, priority);
+        Pageable pageable = page == null && size == null
+                ? Pageable.unpaged()
+                : PageRequest.of(page == null ? 0 : page, size == null ? 10 : size);
+        return maintenanceRequestService.getFilteredRequests(status, priority, category, pageable);
     }
 
     // GET - Get one maintenance request by ID
@@ -91,6 +88,7 @@ public class MaintenanceRequestController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER', 'COORDINATOR', 'MANAGER')")
     public MaintenanceRequestResponseDTO getRequestById(
             @PathVariable Long id) {
 
@@ -112,6 +110,7 @@ public class MaintenanceRequestController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('COORDINATOR', 'MANAGER')")
     public MaintenanceRequestResponseDTO updateStatus(
             @PathVariable Long id,
             @RequestBody UpdateMaintenanceRequestStatusDTO dto) {
@@ -132,6 +131,7 @@ public class MaintenanceRequestController {
             @ApiResponse(responseCode = "409", description = "Request cannot be cancelled in its current status")
     })
     @PostMapping("/{id}/cancel")
+    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER')")
     public MaintenanceRequestResponseDTO cancelRequest(
             @PathVariable Long id) {
 

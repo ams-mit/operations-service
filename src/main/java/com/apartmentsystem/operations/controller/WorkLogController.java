@@ -4,6 +4,7 @@ import com.apartmentsystem.operations.Service.WorkLogService;
 import com.apartmentsystem.operations.dto.CreateWorkLogDTO;
 import com.apartmentsystem.operations.entity.WorkLogEntry;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class WorkLogController {
     }
 
     @PostMapping("/{workOrderId}/logs")
+    @PreAuthorize("hasRole('TECHNICIAN')")
     public WorkLogEntry createWorkLog(
             @PathVariable Long workOrderId,
             @RequestBody CreateWorkLogDTO dto) {
@@ -28,6 +30,7 @@ public class WorkLogController {
     }
 
     @GetMapping("/{workOrderId}/logs")
+    @PreAuthorize("hasAnyRole('TECHNICIAN', 'COORDINATOR', 'MANAGER')")
     public List<WorkLogEntry> getWorkLogs(
             @PathVariable Long workOrderId) {
 

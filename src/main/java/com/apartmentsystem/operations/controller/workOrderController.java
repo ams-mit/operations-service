@@ -5,6 +5,7 @@ import com.apartmentsystem.operations.dto.AssignTechnicianDTO;
 import com.apartmentsystem.operations.dto.CreateWorkOrderDTO;
 import com.apartmentsystem.operations.dto.UpdateWorkOrderStatusDTO;
 import com.apartmentsystem.operations.dto.WorkOrderResponseDTO;
+import com.apartmentsystem.operations.entity.WorkOrderStatus;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,6 +13,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/work-orders")
@@ -51,6 +54,7 @@ public class workOrderController {
             )
     })
     @PostMapping
+    @PreAuthorize("hasRole('COORDINATOR')")
     public WorkOrderResponseDTO createWorkOrder(
             @RequestBody CreateWorkOrderDTO dto) {
 
@@ -81,12 +85,16 @@ public class workOrderController {
             )
     })
     @GetMapping
+    @PreAuthorize("hasAnyRole('TECHNICIAN', 'COORDINATOR')")
     public List<WorkOrderResponseDTO> getAllWorkOrders(
+            @RequestParam(required = false) Long technicianId,
+            @RequestParam(required = false) WorkOrderStatus status,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size) {
-        if (page == null && size == null) return workOrderService.getAllWorkOrders();
-        return workOrderService.getAllWorkOrders(
-                PageRequest.of(page == null ? 0 : page, size == null ? 10 : size));
+        Pageable pageable = page == null && size == null
+                ? Pageable.unpaged()
+                : PageRequest.of(page == null ? 0 : page, size == null ? 10 : size);
+        return workOrderService.getWorkOrders(technicianId, status, pageable);
     }
 
     // PATCH - Update work order status
@@ -121,6 +129,7 @@ public class workOrderController {
             )
     })
     @PatchMapping("/{orderId}/status")
+    @PreAuthorize("hasAnyRole('TECHNICIAN', 'COORDINATOR')")
     public WorkOrderResponseDTO updateWorkOrderStatus(
             @PathVariable Long orderId,
             @RequestBody UpdateWorkOrderStatusDTO dto) {
@@ -164,6 +173,7 @@ public class workOrderController {
             )
     })
     @PatchMapping("/{orderId}/technician")
+    @PreAuthorize("hasRole('COORDINATOR')")
     public WorkOrderResponseDTO assignTechnician(
             @PathVariable Long orderId,
             @RequestBody AssignTechnicianDTO dto) {

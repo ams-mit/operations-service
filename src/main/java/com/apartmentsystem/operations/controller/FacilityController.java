@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/facilities")
@@ -21,6 +22,7 @@ public class FacilityController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public FacilityResponseDTO createFacility(
             @RequestBody CreateFacilityDTO dto) {
         return facilityService.createFacility(dto);
@@ -42,6 +44,7 @@ public class FacilityController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public FacilityResponseDTO updateFacility(
             @PathVariable Long id,
             @RequestBody CreateFacilityDTO dto) {

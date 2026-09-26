@@ -8,6 +8,9 @@ import com.apartmentsystem.operations.entity.WorkOrder;
 import com.apartmentsystem.operations.entity.WorkOrderStatus;
 import com.apartmentsystem.operations.repository.MaintenanceRequestRepository;
 import com.apartmentsystem.operations.repository.WorkOrderRepository;
+import com.apartmentsystem.operations.security.CurrentUser;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 
@@ -85,6 +88,14 @@ public class WorkOrderService {
                 .map(this::convertToResponseDTO).toList();
     }
 
+    public List<WorkOrderResponseDTO> getWorkOrders(
+            Long technicianId, WorkOrderStatus status, Pageable pageable) {
+        Long scopedTechnicianId = CurrentUser.hasRole("TECHNICIAN")
+                ? CurrentUser.id() : technicianId;
+        return workOrderRepository.findFiltered(scopedTechnicianId, status, pageable)
+                .map(this::convertToResponseDTO).toList();
+    }
+
     // Update work order status
     public WorkOrderResponseDTO updateStatus(
             Long orderId,
@@ -97,6 +108,12 @@ public class WorkOrderService {
                                 new RuntimeException("Work order not found"));
 
         WorkOrderStatus currentStatus = workOrder.getStatus();
+
+        if (CurrentUser.hasRole("TECHNICIAN")
+                && !CurrentUser.id().equals(workOrder.getAssignedTechnicianUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Technicians may only update their own work orders");
+        }
 
         // Check whether the requested transition is valid
         if (!isValidTransition(currentStatus, newStatus)) {

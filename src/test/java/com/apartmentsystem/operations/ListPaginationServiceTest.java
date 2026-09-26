@@ -4,9 +4,13 @@ import com.apartmentsystem.operations.Service.*;
 import com.apartmentsystem.operations.entity.*;
 import com.apartmentsystem.operations.repository.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
@@ -17,6 +21,9 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ListPaginationServiceTest {
+
+    @AfterEach
+    void clearSecurityContext() { SecurityContextHolder.clearContext(); }
     @Mock MaintenanceRequestRepository maintenanceRepository;
     @Mock StatusHistoryRepository historyRepository;
     @Mock WorkOrderRepository workOrderRepository;
@@ -28,7 +35,7 @@ class ListPaginationServiceTest {
         MaintenanceRequest request = new MaintenanceRequest();
         request.setId(5L);
         when(maintenanceRepository.findFiltered(MaintenanceRequestStatus.SUBMITTED, "HIGH", "PLUMBING",
-                PageRequest.of(1, 1))).thenReturn(new PageImpl<>(List.of(request)));
+                null, PageRequest.of(1, 1))).thenReturn(new PageImpl<>(List.of(request)));
         MaintenanceRequestService service = new MaintenanceRequestService(maintenanceRepository, historyRepository);
         var results = service.getFilteredRequests(MaintenanceRequestStatus.SUBMITTED, "HIGH", "PLUMBING",
                 PageRequest.of(1, 1));
@@ -37,6 +44,9 @@ class ListPaginationServiceTest {
 
     @Test
     void paginatedWorkOrdersBookingsAndFacilitiesReturnOnlyPageContent() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("1", "",
+                        List.of(new SimpleGrantedAuthority("ROLE_MANAGER"))));
         var pageable = PageRequest.of(0, 1);
         WorkOrder order = new WorkOrder(); order.setId(11L);
         Booking booking = new Booking(); booking.setId(12L);
