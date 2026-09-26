@@ -3,6 +3,7 @@ package com.apartmentsystem.operations.controller;
 import com.apartmentsystem.operations.Service.MaintenanceRequestService;
 import com.apartmentsystem.operations.dto.CreateMaintenanceRequestDTO;
 import com.apartmentsystem.operations.dto.MaintenanceRequestResponseDTO;
+import com.apartmentsystem.operations.dto.UpdateMaintenanceRequestStatusDTO;
 import com.apartmentsystem.operations.entity.MaintenanceRequestStatus;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -131,5 +132,82 @@ public class MaintenanceRequestController {
             @PathVariable Long id) {
 
         return maintenanceRequestService.getRequestById(id);
+    }
+
+    // PATCH - Update maintenance request status
+    @Operation(
+            summary = "Update maintenance request status",
+            description = "Updates the status of a maintenance request according to the allowed status transitions."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Maintenance request status updated successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid request data"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Maintenance request not found"
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Invalid maintenance request status transition"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error"
+            )
+    })
+    @PatchMapping("/{id}/status")
+    public MaintenanceRequestResponseDTO updateStatus(
+            @PathVariable Long id,
+            @RequestBody UpdateMaintenanceRequestStatusDTO dto) {
+
+        return maintenanceRequestService.updateStatus(id, dto);
+    }
+
+    // POST - Cancel a maintenance request
+    @Operation(
+            summary = "Cancel a maintenance request",
+            description = "Cancels a maintenance request created by the authenticated user."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Maintenance request cancelled successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "User is not allowed to cancel this request"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Maintenance request not found"
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Request cannot be cancelled in its current status"
+            )
+    })
+    @PostMapping("/{id}/cancel")
+    public MaintenanceRequestResponseDTO cancelRequest(
+            @PathVariable Long id) {
+
+        return maintenanceRequestService.cancelRequest(id);
     }
 }
