@@ -9,8 +9,9 @@ import com.apartmentsystem.operations.entity.StatusHistory;
 import com.apartmentsystem.operations.exception.InvalidStatusTransitionException;
 import com.apartmentsystem.operations.repository.MaintenanceRequestRepository;
 import com.apartmentsystem.operations.repository.StatusHistoryRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.apartmentsystem.operations.security.CurrentUser;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 
@@ -38,14 +39,13 @@ public class MaintenanceRequestService {
         MaintenanceRequest request = new MaintenanceRequest();
 
         request.setUnitId(dto.getUnitId());
-        request.setRequestedByUserId(dto.getRequestedByUserId());
         request.setCategory(dto.getCategory());
         request.setPriority(dto.getPriority());
         request.setDescription(dto.getDescription());
         request.setAttachmentUrl(dto.getAttachmentUrl());
 
         // Get the currently authenticated user's ID
-        Long currentUserId = getCurrentUserId();
+        Long currentUserId = CurrentUser.id();
         request.setRequestedByUserId(currentUserId);
 
         // System-controlled fields
@@ -65,11 +65,7 @@ public class MaintenanceRequestService {
 
     // Get all maintenance requests
     public List<MaintenanceRequestResponseDTO> getAllRequests() {
-
-        return maintenanceRequestRepository.findAll()
-                .stream()
-                .map(this::convertToResponseDTO)
-                .toList();
+        return getFilteredRequests(null, null, null, Pageable.unpaged());
     }
 
     // Get one maintenance request by ID
@@ -81,6 +77,12 @@ public class MaintenanceRequestService {
                                 new RuntimeException(
                                         "Maintenance request not found"));
 
+        if (CurrentUser.hasAnyRole("RESIDENT", "OWNER")
+                && !CurrentUser.id().equals(request.getRequestedByUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You are not allowed to access this maintenance request");
+        }
+
         return convertToResponseDTO(request);
     }
 
@@ -88,48 +90,19 @@ public class MaintenanceRequestService {
     public List<MaintenanceRequestResponseDTO> getFilteredRequests(
             MaintenanceRequestStatus status,
             String priority) {
-
-        List<MaintenanceRequest> requests;
-
-        if (status != null && priority != null) {
-
-            // Filter by both status and priority
-            requests = maintenanceRequestRepository
-                    .findByStatusAndPriority(status, priority);
-
-        } else if (status != null) {
-
-            // Filter by status only
-            requests = maintenanceRequestRepository
-                    .findByStatus(status);
-
-        } else if (priority != null) {
-
-            // Filter by priority only
-            requests = maintenanceRequestRepository
-                    .findByPriority(priority);
-
-        } else {
-
-            // No filters → get all requests
-            requests = maintenanceRequestRepository.findAll();
-        }
-
-        return requests.stream()
-                .map(this::convertToResponseDTO)
-                .toList();
+        return getFilteredRequests(status, priority, null, Pageable.unpaged());
     }
 
     public List<MaintenanceRequestResponseDTO> getFilteredRequests(
             MaintenanceRequestStatus status, String priority, String category,
             Pageable pageable) {
-        return maintenanceRequestRepository.findFiltered(status, priority, category, pageable)
+        Long requesterId = CurrentUser.hasAnyRole("RESIDENT", "OWNER") ? CurrentUser.id() : null;
+        return maintenanceRequestRepository.findFiltered(status, priority, category, requesterId, pageable)
                 .map(this::convertToResponseDTO).toList();
     }
 
     public List<MaintenanceRequestResponseDTO> getAllRequests(Pageable pageable) {
-        return maintenanceRequestRepository.findAll(pageable)
-                .map(this::convertToResponseDTO).toList();
+        return getFilteredRequests(null, null, null, pageable);
     }
 
     // Update maintenance request status
@@ -168,7 +141,7 @@ public class MaintenanceRequestService {
         history.setMaintenanceRequestId(request.getId());
         history.setOldStatus(currentStatus);
         history.setNewStatus(newStatus);
-        history.setChangedByUserId(getCurrentUserId());
+        history.setChangedByUserId(CurrentUser.id());
         history.setChangedAt(LocalDateTime.now());
 
         statusHistoryRepository.save(history);
@@ -186,7 +159,7 @@ public class MaintenanceRequestService {
                                         "Maintenance request not found"));
 
         // Get the currently authenticated user
-        Long currentUserId = getCurrentUserId();
+        Long currentUserId = CurrentUser.id();
 
         // Only the person who created the request can cancel it
         if (!currentUserId.equals(request.getRequestedByUserId())) {
@@ -274,30 +247,6 @@ public class MaintenanceRequestService {
             case CLOSED, REJECTED, CANCELLED ->
                     false;
         };
-    }
-
-    // Get the currently authenticated user's ID from the JWT subject
-    private Long getCurrentUserId() {
-
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null
-                || authentication.getName() == null
-                || authentication.getName().isBlank()) {
-
-            throw new RuntimeException("Authenticated user not found");
-        }
-
-        try {
-
-            return Long.parseLong(authentication.getName());
-
-        } catch (NumberFormatException exception) {
-
-            throw new RuntimeException(
-                    "Authenticated user ID is not a valid number");
-        }
     }
 
     // Convert Entity → Response DTO

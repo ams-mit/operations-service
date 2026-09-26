@@ -8,8 +8,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
+
+    Page<Booking> findByRequestedByUserId(Long requestedByUserId, Pageable pageable);
 
     List<Booking> findByFacilityIdAndStartTimeLessThanAndEndTimeGreaterThanAndStatus(
             Long facilityId,

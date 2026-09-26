@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
@@ -20,6 +21,7 @@ public class BookingController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER')")
     public BookingResponseDTO createBooking(
             @RequestBody CreateBookingDTO dto) {
 
@@ -27,6 +29,7 @@ public class BookingController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER', 'MANAGER', 'COORDINATOR')")
     public List<BookingResponseDTO> getAllBookings(
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size) {
@@ -36,6 +39,7 @@ public class BookingController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER', 'MANAGER', 'COORDINATOR')")
     public BookingResponseDTO getBookingById(
             @PathVariable Long id) {
 
@@ -43,6 +47,7 @@ public class BookingController {
     }
 
     @PatchMapping("/{id}/decision")
+    @PreAuthorize("hasRole('MANAGER')")
     public BookingResponseDTO decideBooking(
             @PathVariable Long id,
             @RequestBody BookingDecisionDTO dto) {
@@ -56,9 +61,10 @@ public class BookingController {
     }
 
     @PostMapping("/{id}/cancel")
+    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER', 'MANAGER')")
     public BookingResponseDTO cancelBooking(
             @PathVariable Long id,
-            @RequestParam Long userId) {
+            @RequestParam(required = false) Long userId) {
 
         return bookingService.cancelBooking(id, userId);
     }

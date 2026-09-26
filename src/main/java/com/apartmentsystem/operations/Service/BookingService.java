@@ -8,6 +8,9 @@ import com.apartmentsystem.operations.entity.Facility;
 import com.apartmentsystem.operations.entity.FacilityStatus;
 import com.apartmentsystem.operations.repository.BookingRepository;
 import com.apartmentsystem.operations.repository.FacilityRepository;
+import com.apartmentsystem.operations.security.CurrentUser;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 
@@ -94,7 +97,7 @@ public class BookingService {
         Booking booking = new Booking();
 
         booking.setFacilityId(dto.getFacilityId());
-        booking.setRequestedByUserId(dto.getRequestedByUserId());
+        booking.setRequestedByUserId(CurrentUser.id());
         booking.setUnitId(dto.getUnitId());
         booking.setStartTime(dto.getStartTime());
         booking.setEndTime(dto.getEndTime());
@@ -112,7 +115,13 @@ public class BookingService {
     }
 
     public List<BookingResponseDTO> getAllBookings() {
-
+        if (CurrentUser.hasAnyRole("RESIDENT", "OWNER")) {
+            return bookingRepository.findByRequestedByUserId(CurrentUser.id(), Pageable.unpaged())
+                    .map(this::convertToResponseDTO).toList();
+        }
+        if (!CurrentUser.hasAnyRole("MANAGER", "COORDINATOR")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to view bookings");
+        }
         return bookingRepository.findAll()
                 .stream()
                 .map(this::convertToResponseDTO)
@@ -120,6 +129,13 @@ public class BookingService {
     }
 
     public List<BookingResponseDTO> getAllBookings(Pageable pageable) {
+        if (CurrentUser.hasAnyRole("RESIDENT", "OWNER")) {
+            return bookingRepository.findByRequestedByUserId(CurrentUser.id(), pageable)
+                    .map(this::convertToResponseDTO).toList();
+        }
+        if (!CurrentUser.hasAnyRole("MANAGER", "COORDINATOR")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to view bookings");
+        }
         return bookingRepository.findAll(pageable)
                 .map(this::convertToResponseDTO).toList();
     }
@@ -129,6 +145,8 @@ public class BookingService {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("Booking not found"));
+
+        assertCanAccessBooking(booking);
 
         return convertToResponseDTO(booking);
     }
@@ -178,7 +196,7 @@ public class BookingService {
             booking.setStatus(BookingStatus.REJECTED);
         }
 
-        booking.setDecidedByUserId(decidedByUserId);
+        booking.setDecidedByUserId(CurrentUser.id());
         booking.setDecisionNote(note);
         booking.setDecidedAt(LocalDateTime.now());
         booking.setUpdatedAt(LocalDateTime.now());
@@ -205,8 +223,9 @@ public class BookingService {
                     "Only pending or approved bookings can be cancelled");
         }
 
-        if (booking.getRequestedByUserId() != null
-                && !booking.getRequestedByUserId().equals(userId)) {
+        Long currentUserId = CurrentUser.id();
+        if (!CurrentUser.hasRole("MANAGER") && booking.getRequestedByUserId() != null
+                && !booking.getRequestedByUserId().equals(currentUserId)) {
 
             throw new RuntimeException(
                     "Only the booking requester can cancel this booking");
@@ -219,6 +238,17 @@ public class BookingService {
                 bookingRepository.save(booking);
 
         return convertToResponseDTO(updatedBooking);
+    }
+
+    private void assertCanAccessBooking(Booking booking) {
+        if (CurrentUser.hasAnyRole("RESIDENT", "OWNER")
+                && !CurrentUser.id().equals(booking.getRequestedByUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You are not allowed to access this booking");
+        }
+        if (!CurrentUser.hasAnyRole("RESIDENT", "OWNER", "MANAGER", "COORDINATOR")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to view bookings");
+        }
     }
 
     private BookingResponseDTO convertToResponseDTO(

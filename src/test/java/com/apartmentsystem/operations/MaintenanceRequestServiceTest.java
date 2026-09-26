@@ -6,13 +6,14 @@ import com.apartmentsystem.operations.entity.MaintenanceRequestStatus;
 import com.apartmentsystem.operations.exception.InvalidStatusTransitionException;
 import com.apartmentsystem.operations.repository.MaintenanceRequestRepository;
 import com.apartmentsystem.operations.repository.StatusHistoryRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
@@ -42,7 +43,8 @@ class MaintenanceRequestServiceTest {
     void shouldAllowSubmittedToAcknowledged() {
 
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("1", null)
+                new UsernamePasswordAuthenticationToken("1", null,
+                        java.util.List.of(new SimpleGrantedAuthority("ROLE_COORDINATOR")))
         );
 
         MaintenanceRequest request = new MaintenanceRequest();

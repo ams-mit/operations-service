@@ -25,11 +25,13 @@ public interface MaintenanceRequestRepository
     @Query("select m from MaintenanceRequest m where " +
             "(:status is null or m.status = :status) and " +
             "(:priority is null or m.priority = :priority) and " +
-            "(:category is null or m.category = :category)")
+            "(:category is null or m.category = :category) and " +
+            "(:requesterId is null or m.requestedByUserId = :requesterId)")
     Page<MaintenanceRequest> findFiltered(
             @Param("status") MaintenanceRequestStatus status,
             @Param("priority") String priority,
             @Param("category") String category,
+            @Param("requesterId") Long requesterId,
             Pageable pageable);
 
     @Query("select m.status as label, count(m) as total from MaintenanceRequest m group by m.status")

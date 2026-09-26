@@ -63,6 +63,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
+        UsernamePasswordAuthenticationToken authentication;
         try {
 
             // 1. Extract JWT
@@ -111,19 +112,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
 
             // 7. Create authenticated user
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
+            authentication = new UsernamePasswordAuthenticationToken(
                             subject,
                             null,
                             authorities
                     );
-
-            // 8. Store authentication in Spring Security
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authentication);
-
-            // 9. Continue to controller
-            filterChain.doFilter(request, response);
 
         } catch (Exception e) {
 
@@ -131,7 +124,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             SecurityContextHolder.clearContext();
 
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        filterChain.doFilter(request, response);
     }
 
     private PublicKey parsePublicKey(String pemPublicKey) throws Exception {
