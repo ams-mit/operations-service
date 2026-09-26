@@ -1,6 +1,7 @@
 package com.apartmentsystem.operations.controller;
 
 import com.apartmentsystem.operations.Service.WorkOrderService;
+import com.apartmentsystem.operations.dto.AssignTechnicianDTO;
 import com.apartmentsystem.operations.dto.CreateWorkOrderDTO;
 import com.apartmentsystem.operations.dto.UpdateWorkOrderStatusDTO;
 import com.apartmentsystem.operations.dto.WorkOrderResponseDTO;
@@ -124,6 +125,48 @@ public class workOrderController {
                 orderId,
                 dto.getStatus(),
                 dto.getResolutionNotes()
+        );
+    }
+
+    // PATCH - Assign or reassign technician
+    @Operation(
+            summary = "Assign or reassign technician",
+            description = "Assigns a technician to a work order or replaces the currently assigned technician."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Technician assigned successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid technician data"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Work order not found"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error"
+            )
+    })
+    @PatchMapping("/{orderId}/technician")
+    public WorkOrderResponseDTO assignTechnician(
+            @PathVariable Long orderId,
+            @RequestBody AssignTechnicianDTO dto) {
+
+        return workOrderService.assignTechnician(
+                orderId,
+                dto.getTechnicianUserId()
         );
     }
 }

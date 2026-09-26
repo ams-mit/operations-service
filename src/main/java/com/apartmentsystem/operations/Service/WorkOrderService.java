@@ -36,12 +36,15 @@ public class WorkOrderService {
                                 new RuntimeException(
                                         "Maintenance request not found"));
 
-        // A maintenance request must be SUBMITTED before it can be assigned
+        // A maintenance request must be SUBMITTED or ACKNOWLEDGED
+        // before a work order can be created
         if (maintenanceRequest.getStatus()
-                != MaintenanceRequestStatus.SUBMITTED) {
+                != MaintenanceRequestStatus.SUBMITTED
+                && maintenanceRequest.getStatus()
+                != MaintenanceRequestStatus.ACKNOWLEDGED) {
 
             throw new RuntimeException(
-                    "Maintenance request must be SUBMITTED before it can be assigned");
+                    "Maintenance request must be SUBMITTED or ACKNOWLEDGED before a work order can be created");
         }
 
         // Create WorkOrder
@@ -118,6 +121,33 @@ public class WorkOrderService {
                 maintenanceRequestRepository.save(request);
             }
         }
+
+        return convertToResponseDTO(updatedWorkOrder);
+    }
+
+    // Assign or reassign a technician
+    public WorkOrderResponseDTO assignTechnician(
+            Long orderId,
+            Long technicianUserId) {
+
+        WorkOrder workOrder =
+                workOrderRepository.findById(orderId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Work order not found"));
+
+        // A closed work order cannot be reassigned
+        if (workOrder.getStatus() == WorkOrderStatus.CLOSED) {
+
+            throw new RuntimeException(
+                    "Closed work order cannot be reassigned");
+        }
+
+        // Assign or replace the technician
+        workOrder.setAssignedTechnicianUserId(technicianUserId);
+
+        WorkOrder updatedWorkOrder =
+                workOrderRepository.save(workOrder);
 
         return convertToResponseDTO(updatedWorkOrder);
     }
