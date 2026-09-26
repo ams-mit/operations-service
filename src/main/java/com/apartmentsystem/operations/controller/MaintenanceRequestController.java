@@ -3,6 +3,7 @@ package com.apartmentsystem.operations.controller;
 import com.apartmentsystem.operations.Service.MaintenanceRequestService;
 import com.apartmentsystem.operations.dto.CreateMaintenanceRequestDTO;
 import com.apartmentsystem.operations.dto.MaintenanceRequestResponseDTO;
+import com.apartmentsystem.operations.dto.UpdateMaintenanceRequestStatusDTO;
 import com.apartmentsystem.operations.entity.MaintenanceRequestStatus;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -131,5 +132,14 @@ public class MaintenanceRequestController {
             @PathVariable Long id) {
 
         return maintenanceRequestService.getRequestById(id);
+    }
+
+    // PATCH - Update maintenance request status
+    @PatchMapping("/{id}/status")
+    public MaintenanceRequestResponseDTO updateStatus(
+            @PathVariable Long id,
+            @RequestBody UpdateMaintenanceRequestStatusDTO dto) {
+
+        return maintenanceRequestService.updateStatus(id, dto.getStatus());
     }
 }
