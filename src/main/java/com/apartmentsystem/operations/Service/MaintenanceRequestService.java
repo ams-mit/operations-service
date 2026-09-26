@@ -37,6 +37,7 @@ public class MaintenanceRequestService {
         MaintenanceRequest request = new MaintenanceRequest();
 
         request.setUnitId(dto.getUnitId());
+        request.setRequestedByUserId(dto.getRequestedByUserId());
         request.setCategory(dto.getCategory());
         request.setPriority(dto.getPriority());
         request.setDescription(dto.getDescription());
@@ -294,12 +295,35 @@ public class MaintenanceRequestService {
                 new MaintenanceRequestResponseDTO();
 
         response.setId(request.getId());
+        response.setUnitId(request.getUnitId());
+        response.setRequestedByUserId(request.getRequestedByUserId());
         response.setStatus(request.getStatus());
         response.setCategory(request.getCategory());
         response.setPriority(request.getPriority());
         response.setDescription(request.getDescription());
+        response.setAttachmentUrl(request.getAttachmentUrl());
         response.setCreatedAt(request.getCreatedAt());
+        response.setUpdatedAt(request.getUpdatedAt());
 
         return response;
+    }
+
+    // Update maintenance request status
+    public MaintenanceRequestResponseDTO updateStatus(
+            Long id,
+            MaintenanceRequestStatus newStatus) {
+
+        MaintenanceRequest request =
+                maintenanceRequestRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Maintenance request not found"));
+
+        request.setStatus(newStatus);
+        
+        MaintenanceRequest updatedRequest =
+                maintenanceRequestRepository.save(request);
+
+        return convertToResponseDTO(updatedRequest);
     }
 }

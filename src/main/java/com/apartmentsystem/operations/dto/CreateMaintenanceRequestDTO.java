@@ -11,6 +11,9 @@ public class CreateMaintenanceRequestDTO {
     @Schema(description = "ID of the unit where the maintenance issue exists", example = "101")
     private Long unitId;
 
+    @Schema(description = "ID of the user submitting the request", example = "42")
+    private Long requestedByUserId;
+
     @Schema(description = "Category of the maintenance issue", example = "PLUMBING")
     private String category;
 

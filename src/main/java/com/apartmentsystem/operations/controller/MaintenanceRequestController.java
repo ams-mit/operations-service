@@ -30,26 +30,11 @@ public class MaintenanceRequestController {
             description = "Creates a new maintenance request."
     )
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Maintenance request created successfully"
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid request data"
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized"
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden"
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Internal server error"
-            )
+            @ApiResponse(responseCode = "200", description = "Maintenance request created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
     public MaintenanceRequestResponseDTO createRequest(
@@ -64,36 +49,18 @@ public class MaintenanceRequestController {
             description = "Retrieves all maintenance requests with optional status and priority filters."
     )
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Maintenance requests retrieved successfully"
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid filter parameters"
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized"
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden"
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Internal server error"
-            )
+            @ApiResponse(responseCode = "200", description = "Maintenance requests retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid filter parameters"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
     public List<MaintenanceRequestResponseDTO> getAllRequests(
             @RequestParam(required = false) MaintenanceRequestStatus status,
             @RequestParam(required = false) String priority) {
 
-        return maintenanceRequestService.getFilteredRequests(
-                status,
-                priority
-        );
+        return maintenanceRequestService.getFilteredRequests(status, priority);
     }
 
     // GET - Get one maintenance request by ID
@@ -102,30 +69,12 @@ public class MaintenanceRequestController {
             description = "Retrieves a specific maintenance request using its ID."
     )
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Maintenance request retrieved successfully"
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid request ID"
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized"
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Maintenance request not found"
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Internal server error"
-            )
+            @ApiResponse(responseCode = "200", description = "Maintenance request retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request ID"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Maintenance request not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{id}")
     public MaintenanceRequestResponseDTO getRequestById(
@@ -140,34 +89,13 @@ public class MaintenanceRequestController {
             description = "Updates the status of a maintenance request according to the allowed status transitions."
     )
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Maintenance request status updated successfully"
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid request data"
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized"
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Maintenance request not found"
-            ),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "Invalid maintenance request status transition"
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Internal server error"
-            )
+            @ApiResponse(responseCode = "200", description = "Maintenance request status updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Maintenance request not found"),
+            @ApiResponse(responseCode = "409", description = "Invalid maintenance request status transition"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PatchMapping("/{id}/status")
     public MaintenanceRequestResponseDTO updateStatus(
@@ -183,26 +111,11 @@ public class MaintenanceRequestController {
             description = "Cancels a maintenance request created by the authenticated user."
     )
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Maintenance request cancelled successfully"
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized"
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "User is not allowed to cancel this request"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Maintenance request not found"
-            ),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "Request cannot be cancelled in its current status"
-            )
+            @ApiResponse(responseCode = "200", description = "Maintenance request cancelled successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "User is not allowed to cancel this request"),
+            @ApiResponse(responseCode = "404", description = "Maintenance request not found"),
+            @ApiResponse(responseCode = "409", description = "Request cannot be cancelled in its current status")
     })
     @PostMapping("/{id}/cancel")
     public MaintenanceRequestResponseDTO cancelRequest(
