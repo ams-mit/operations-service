@@ -12,6 +12,7 @@ import com.apartmentsystem.operations.repository.StatusHistoryRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -117,6 +118,18 @@ public class MaintenanceRequestService {
         return requests.stream()
                 .map(this::convertToResponseDTO)
                 .toList();
+    }
+
+    public List<MaintenanceRequestResponseDTO> getFilteredRequests(
+            MaintenanceRequestStatus status, String priority, String category,
+            Pageable pageable) {
+        return maintenanceRequestRepository.findFiltered(status, priority, category, pageable)
+                .map(this::convertToResponseDTO).toList();
+    }
+
+    public List<MaintenanceRequestResponseDTO> getAllRequests(Pageable pageable) {
+        return maintenanceRequestRepository.findAll(pageable)
+                .map(this::convertToResponseDTO).toList();
     }
 
     // Update maintenance request status

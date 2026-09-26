@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
 
 @RestController
 @RequestMapping("/api/v1/work-orders")
@@ -80,9 +81,12 @@ public class workOrderController {
             )
     })
     @GetMapping
-    public List<WorkOrderResponseDTO> getAllWorkOrders() {
-
-        return workOrderService.getAllWorkOrders();
+    public List<WorkOrderResponseDTO> getAllWorkOrders(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        if (page == null && size == null) return workOrderService.getAllWorkOrders();
+        return workOrderService.getAllWorkOrders(
+                PageRequest.of(page == null ? 0 : page, size == null ? 10 : size));
     }
 
     // PATCH - Update work order status

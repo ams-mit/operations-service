@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/api/v1/maintenance-requests")
@@ -58,8 +60,20 @@ public class MaintenanceRequestController {
     @GetMapping
     public List<MaintenanceRequestResponseDTO> getAllRequests(
             @RequestParam(required = false) MaintenanceRequestStatus status,
-            @RequestParam(required = false) String priority) {
+            @RequestParam(required = false) String priority,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
 
+        if (page != null || size != null) {
+            Pageable pageable = PageRequest.of(page == null ? 0 : page, size == null ? 10 : size);
+            return maintenanceRequestService.getFilteredRequests(status, priority, category, pageable);
+        }
+
+        if (category != null) {
+            return maintenanceRequestService.getFilteredRequests(status, priority, category,
+                    Pageable.unpaged());
+        }
         return maintenanceRequestService.getFilteredRequests(status, priority);
     }
 
