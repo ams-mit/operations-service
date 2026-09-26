@@ -25,4 +25,4 @@ public class CreateMaintenanceRequestDTO {
 
     @Schema(description = "URL of an attachment related to the maintenance issue", example = "https://example.com/image.jpg")
     private String attachmentUrl;
-}
+}

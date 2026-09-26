@@ -1,0 +1,10 @@
+```text
+.git
+.gitignore
+.github
+target
+.idea
+.vscode
+*.iml
+README.md
+```
