@@ -26,18 +26,14 @@ public class WorkOrderService {
         this.maintenanceRequestRepository = maintenanceRequestRepository;
     }
 
-    // Create and assign a work order
+    // Create a work order
     public WorkOrderResponseDTO createWorkOrder(CreateWorkOrderDTO dto) {
 
-        // Find the maintenance request
         MaintenanceRequest maintenanceRequest =
                 maintenanceRequestRepository.findById(dto.getMaintenanceRequestId())
                         .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Maintenance request not found"));
+                                new RuntimeException("Maintenance request not found"));
 
-        // A maintenance request must be SUBMITTED or ACKNOWLEDGED
-        // before a work order can be created
         if (maintenanceRequest.getStatus()
                 != MaintenanceRequestStatus.SUBMITTED
                 && maintenanceRequest.getStatus()
@@ -47,7 +43,6 @@ public class WorkOrderService {
                     "Maintenance request must be SUBMITTED or ACKNOWLEDGED before a work order can be created");
         }
 
-        // Create WorkOrder
         WorkOrder workOrder = new WorkOrder();
 
         workOrder.setMaintenanceRequestId(
@@ -60,13 +55,15 @@ public class WorkOrderService {
                 dto.getScheduledDate());
 
         // Initial status
-        workOrder.setStatus(WorkOrderStatus.ASSIGNED);
+        if (dto.getAssignedTechnicianUserId() != null) {
+            workOrder.setStatus(WorkOrderStatus.ASSIGNED);
+        } else {
+            workOrder.setStatus(WorkOrderStatus.CREATED);
+        }
 
-        // Update the maintenance request status so it's not SUBMITTED anymore
         maintenanceRequest.setStatus(MaintenanceRequestStatus.ASSIGNED);
         maintenanceRequestRepository.save(maintenanceRequest);
 
-        // Save WorkOrder
         WorkOrder savedWorkOrder =
                 workOrderRepository.save(workOrder);
 
@@ -91,14 +88,18 @@ public class WorkOrderService {
         WorkOrder workOrder =
                 workOrderRepository.findById(orderId)
                         .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Work order not found"));
+                                new RuntimeException("Work order not found"));
 
-        // A closed work order cannot be reopened
-        if (workOrder.getStatus() == WorkOrderStatus.CLOSED) {
+        WorkOrderStatus currentStatus = workOrder.getStatus();
+
+        // Check whether the requested transition is valid
+        if (!isValidTransition(currentStatus, newStatus)) {
 
             throw new RuntimeException(
-                    "Closed work order cannot be reopened or reassigned");
+                    "Invalid work order status transition from "
+                            + currentStatus
+                            + " to "
+                            + newStatus);
         }
 
         workOrder.setStatus(newStatus);
@@ -110,12 +111,14 @@ public class WorkOrderService {
         WorkOrder updatedWorkOrder =
                 workOrderRepository.save(workOrder);
 
-        // Update parent maintenance request if work order is closed
-        if (newStatus == WorkOrderStatus.CLOSED) {
-            MaintenanceRequest request = maintenanceRequestRepository
-                    .findById(workOrder.getMaintenanceRequestId())
-                    .orElse(null);
-            
+        // When work order is VERIFIED, close the related maintenance request
+        if (newStatus == WorkOrderStatus.VERIFIED) {
+
+            MaintenanceRequest request =
+                    maintenanceRequestRepository
+                            .findById(workOrder.getMaintenanceRequestId())
+                            .orElse(null);
+
             if (request != null) {
                 request.setStatus(MaintenanceRequestStatus.CLOSED);
                 maintenanceRequestRepository.save(request);
@@ -123,6 +126,57 @@ public class WorkOrderService {
         }
 
         return convertToResponseDTO(updatedWorkOrder);
+    }
+
+    // Validate allowed Work Order status transitions
+    private boolean isValidTransition(
+            WorkOrderStatus currentStatus,
+            WorkOrderStatus newStatus) {
+
+        // CREATED -> ASSIGNED
+        if (currentStatus == WorkOrderStatus.CREATED
+                && newStatus == WorkOrderStatus.ASSIGNED) {
+            return true;
+        }
+
+        // ASSIGNED -> IN_PROGRESS
+        if (currentStatus == WorkOrderStatus.ASSIGNED
+                && newStatus == WorkOrderStatus.IN_PROGRESS) {
+            return true;
+        }
+
+        // ASSIGNED -> REASSIGNED
+        if (currentStatus == WorkOrderStatus.ASSIGNED
+                && newStatus == WorkOrderStatus.REASSIGNED) {
+            return true;
+        }
+
+        // REASSIGNED -> ASSIGNED
+        if (currentStatus == WorkOrderStatus.REASSIGNED
+                && newStatus == WorkOrderStatus.ASSIGNED) {
+            return true;
+        }
+
+        // IN_PROGRESS -> COMPLETED
+        if (currentStatus == WorkOrderStatus.IN_PROGRESS
+                && newStatus == WorkOrderStatus.COMPLETED) {
+            return true;
+        }
+
+        // COMPLETED -> VERIFIED
+        if (currentStatus == WorkOrderStatus.COMPLETED
+                && newStatus == WorkOrderStatus.VERIFIED) {
+            return true;
+        }
+
+        // Any non-terminal status -> CANCELLED
+        if (newStatus == WorkOrderStatus.CANCELLED
+                && currentStatus != WorkOrderStatus.VERIFIED
+                && currentStatus != WorkOrderStatus.CANCELLED) {
+            return true;
+        }
+
+        return false;
     }
 
     // Assign or reassign a technician
@@ -133,17 +187,16 @@ public class WorkOrderService {
         WorkOrder workOrder =
                 workOrderRepository.findById(orderId)
                         .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Work order not found"));
+                                new RuntimeException("Work order not found"));
 
-        // A closed work order cannot be reassigned
-        if (workOrder.getStatus() == WorkOrderStatus.CLOSED) {
+        // Verified work orders cannot be reassigned
+        if (workOrder.getStatus() == WorkOrderStatus.VERIFIED
+                || workOrder.getStatus() == WorkOrderStatus.CANCELLED) {
 
             throw new RuntimeException(
-                    "Closed work order cannot be reassigned");
+                    "Completed work order cannot be reassigned");
         }
 
-        // Assign or replace the technician
         workOrder.setAssignedTechnicianUserId(technicianUserId);
 
         WorkOrder updatedWorkOrder =
@@ -152,7 +205,7 @@ public class WorkOrderService {
         return convertToResponseDTO(updatedWorkOrder);
     }
 
-    // Convert Entity → Response DTO
+    // Convert Entity -> Response DTO
     private WorkOrderResponseDTO convertToResponseDTO(
             WorkOrder workOrder) {
 
