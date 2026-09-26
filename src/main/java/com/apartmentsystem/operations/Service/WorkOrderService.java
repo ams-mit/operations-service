@@ -109,6 +109,33 @@ public class WorkOrderService {
         return convertToResponseDTO(updatedWorkOrder);
     }
 
+    // Assign or reassign a technician
+    public WorkOrderResponseDTO assignTechnician(
+            Long orderId,
+            Long technicianUserId) {
+
+        WorkOrder workOrder =
+                workOrderRepository.findById(orderId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Work order not found"));
+
+        // A closed work order cannot be reassigned
+        if (workOrder.getStatus() == WorkOrderStatus.CLOSED) {
+
+            throw new RuntimeException(
+                    "Closed work order cannot be reassigned");
+        }
+
+        // Assign or replace the technician
+        workOrder.setAssignedTechnicianUserId(technicianUserId);
+
+        WorkOrder updatedWorkOrder =
+                workOrderRepository.save(workOrder);
+
+        return convertToResponseDTO(updatedWorkOrder);
+    }
+
     // Convert Entity → Response DTO
     private WorkOrderResponseDTO convertToResponseDTO(
             WorkOrder workOrder) {
