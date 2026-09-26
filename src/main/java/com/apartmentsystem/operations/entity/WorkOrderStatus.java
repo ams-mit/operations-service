@@ -1,8 +1,11 @@
 package com.apartmentsystem.operations.entity;
 
 public enum WorkOrderStatus {
+    CREATED,
     ASSIGNED,
+    REASSIGNED,
     IN_PROGRESS,
-    RESOLVED,
-    CLOSED
+    COMPLETED,
+    VERIFIED,
+    CANCELLED
 }
