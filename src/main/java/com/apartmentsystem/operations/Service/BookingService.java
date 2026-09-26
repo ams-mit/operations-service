@@ -9,6 +9,7 @@ import com.apartmentsystem.operations.entity.FacilityStatus;
 import com.apartmentsystem.operations.repository.BookingRepository;
 import com.apartmentsystem.operations.repository.FacilityRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -116,6 +117,11 @@ public class BookingService {
                 .stream()
                 .map(this::convertToResponseDTO)
                 .toList();
+    }
+
+    public List<BookingResponseDTO> getAllBookings(Pageable pageable) {
+        return bookingRepository.findAll(pageable)
+                .map(this::convertToResponseDTO).toList();
     }
 
     public BookingResponseDTO getBookingById(Long id) {

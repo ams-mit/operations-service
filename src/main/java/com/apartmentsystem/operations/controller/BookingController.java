@@ -7,6 +7,7 @@ import com.apartmentsystem.operations.dto.CreateBookingDTO;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
@@ -26,9 +27,12 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingResponseDTO> getAllBookings() {
-
-        return bookingService.getAllBookings();
+    public List<BookingResponseDTO> getAllBookings(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        if (page == null && size == null) return bookingService.getAllBookings();
+        return bookingService.getAllBookings(
+                PageRequest.of(page == null ? 0 : page, size == null ? 10 : size));
     }
 
     @GetMapping("/{id}")

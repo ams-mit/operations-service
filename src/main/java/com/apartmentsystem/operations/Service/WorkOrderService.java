@@ -9,6 +9,7 @@ import com.apartmentsystem.operations.entity.WorkOrderStatus;
 import com.apartmentsystem.operations.repository.MaintenanceRequestRepository;
 import com.apartmentsystem.operations.repository.WorkOrderRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -77,6 +78,11 @@ public class WorkOrderService {
                 .stream()
                 .map(this::convertToResponseDTO)
                 .toList();
+    }
+
+    public List<WorkOrderResponseDTO> getAllWorkOrders(Pageable pageable) {
+        return workOrderRepository.findAll(pageable)
+                .map(this::convertToResponseDTO).toList();
     }
 
     // Update work order status

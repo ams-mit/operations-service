@@ -7,6 +7,7 @@ import com.apartmentsystem.operations.entity.Facility;
 import com.apartmentsystem.operations.entity.FacilityStatus;
 import com.apartmentsystem.operations.repository.FacilityRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -47,6 +48,11 @@ public class FacilityService {
                 .stream()
                 .map(this::convertToResponseDTO)
                 .toList();
+    }
+
+    public List<FacilityResponseDTO> getAllFacilities(Pageable pageable) {
+        return facilityRepository.findAll(pageable)
+                .map(this::convertToResponseDTO).toList();
     }
 
     public FacilityResponseDTO getFacilityById(Long id) {
