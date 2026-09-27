@@ -1,0 +1,10 @@
+services:
+  operations-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: operations-service
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+    ports:
+      - "8084:8084"
