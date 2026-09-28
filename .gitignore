@@ -38,3 +38,4 @@ build/
 operation service UI/
 AMS_REACT_PROJECT_STANDARDS.md
 AMS_UI_DESIGN_SYSTEM.md
+.env
