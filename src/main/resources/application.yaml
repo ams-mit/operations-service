@@ -4,6 +4,7 @@ server:
 spring:
   profiles:
     active: dev
+
   datasource:
     url: jdbc:mysql://localhost:3307/operations_db
     username: root
@@ -11,8 +12,12 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
 
   security:
     user:
