@@ -1,10 +1,35 @@
 services:
+  operations-db:
+    image: mysql:8.0
+    container_name: operations-db
+    environment:
+      MYSQL_DATABASE: operations_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3309:3306"
+    volumes:
+      - operations_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   operations-service:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: operations-service
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_DATASOURCE_URL: jdbc:mysql://operations-db:3306/operations_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
       - "8084:8084"
+    depends_on:
+      operations-db:
+        condition: service_healthy
+
+volumes:
+  operations_db_data:
