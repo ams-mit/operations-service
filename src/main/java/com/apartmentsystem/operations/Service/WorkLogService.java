@@ -29,7 +29,7 @@ public class WorkLogService {
 
         WorkOrder workOrder = workOrderRepository.findById(dto.getWorkOrderId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Work order not found"));
-        Long currentUserId = CurrentUser.id();
+        String currentUserId = CurrentUser.id();
         if (!currentUserId.equals(workOrder.getAssignedTechnicianUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "Technicians may only log work for their assigned work orders");
@@ -48,7 +48,7 @@ public class WorkLogService {
     public List<WorkLogEntry> getWorkLogs(Long workOrderId) {
         WorkOrder workOrder = workOrderRepository.findById(workOrderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Work order not found"));
-        if (!CurrentUser.hasRole("COORDINATOR") && !CurrentUser.hasRole("MANAGER")
+        if (!CurrentUser.hasRole("MAINTENANCE_COORDINATOR") && !CurrentUser.hasRole("APARTMENT_MANAGER")
                 && !CurrentUser.id().equals(workOrder.getAssignedTechnicianUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "Technicians may only view logs for their assigned work orders");

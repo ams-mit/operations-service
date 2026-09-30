@@ -104,7 +104,7 @@ class BookingServiceTest {
 
             currentUser.when(
                             com.apartmentsystem.operations.security.CurrentUser::id)
-                    .thenReturn(50L);
+                    .thenReturn("uuid-50");
 
             BookingResponseDTO result =
                     bookingService.createBooking(dto);
@@ -246,7 +246,7 @@ class BookingServiceTest {
 
             currentUser.when(
                             com.apartmentsystem.operations.security.CurrentUser::id)
-                    .thenReturn(50L);
+                    .thenReturn("uuid-50");
 
             BookingResponseDTO result =
                     bookingService.createBooking(dto);

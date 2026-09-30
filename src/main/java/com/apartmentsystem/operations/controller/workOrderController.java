@@ -54,7 +54,7 @@ public class workOrderController {
             )
     })
     @PostMapping
-    @PreAuthorize("hasRole('COORDINATOR')")
+    @PreAuthorize("hasRole('MAINTENANCE_COORDINATOR')")
     public WorkOrderResponseDTO createWorkOrder(
             @RequestBody CreateWorkOrderDTO dto) {
 
@@ -85,9 +85,9 @@ public class workOrderController {
             )
     })
     @GetMapping
-    @PreAuthorize("hasAnyRole('TECHNICIAN', 'COORDINATOR')")
+    @PreAuthorize("hasAnyRole('TECHNICIAN', 'MAINTENANCE_COORDINATOR')")
     public List<WorkOrderResponseDTO> getAllWorkOrders(
-            @RequestParam(required = false) Long technicianId,
+            @RequestParam(required = false) String technicianId,
             @RequestParam(required = false) WorkOrderStatus status,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size) {
@@ -129,7 +129,7 @@ public class workOrderController {
             )
     })
     @PatchMapping("/{orderId}/status")
-    @PreAuthorize("hasAnyRole('TECHNICIAN', 'COORDINATOR')")
+    @PreAuthorize("hasAnyRole('TECHNICIAN', 'MAINTENANCE_COORDINATOR')")
     public WorkOrderResponseDTO updateWorkOrderStatus(
             @PathVariable Long orderId,
             @RequestBody UpdateWorkOrderStatusDTO dto) {
@@ -173,7 +173,7 @@ public class workOrderController {
             )
     })
     @PatchMapping("/{orderId}/technician")
-    @PreAuthorize("hasRole('COORDINATOR')")
+    @PreAuthorize("hasRole('MAINTENANCE_COORDINATOR')")
     public WorkOrderResponseDTO assignTechnician(
             @PathVariable Long orderId,
             @RequestBody AssignTechnicianDTO dto) {

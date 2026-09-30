@@ -22,7 +22,7 @@ public class FacilityController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('APARTMENT_MANAGER')")
     public FacilityResponseDTO createFacility(
             @RequestBody CreateFacilityDTO dto) {
         return facilityService.createFacility(dto);
@@ -44,7 +44,7 @@ public class FacilityController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('APARTMENT_MANAGER')")
     public FacilityResponseDTO updateFacility(
             @PathVariable Long id,
             @RequestBody CreateFacilityDTO dto) {

@@ -31,7 +31,7 @@ public interface MaintenanceRequestRepository
             @Param("status") MaintenanceRequestStatus status,
             @Param("priority") String priority,
             @Param("category") String category,
-            @Param("requesterId") Long requesterId,
+            @Param("requesterId") String requesterId,
             Pageable pageable);
 
     @Query("select m.status as label, count(m) as total from MaintenanceRequest m group by m.status")

@@ -39,7 +39,7 @@ class SecurityAuthorizationTest {
     }
 
     @Test
-    @WithMockUser(username = "101", roles = "MANAGER")
+    @WithMockUser(username = "some-uuid-101", roles = "APARTMENT_MANAGER")
     void managerRoleIsAllowedThroughReportAuthorization() {
         assertDoesNotThrow(() -> reportController.getMaintenanceSummary("status"));
     }
@@ -47,8 +47,8 @@ class SecurityAuthorizationTest {
     @Test
     void residentAndTechnicianRepositoryScopesExecute() {
         assertDoesNotThrow(() -> maintenanceRequestRepository.findFiltered(
-                null, null, null, 101L, Pageable.unpaged()));
+                null, null, null, "some-uuid-101", Pageable.unpaged()));
         assertDoesNotThrow(() -> workOrderRepository.findFiltered(
-                101L, null, Pageable.unpaged()));
+                "some-uuid-101", null, Pageable.unpaged()));
     }
 }

@@ -9,7 +9,7 @@ public class CreateWorkLogDTO {
 
     private Long workOrderId;
 
-    private Long technicianId;
+    private String technicianId;
 
     private String note;
 }

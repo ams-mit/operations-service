@@ -23,14 +23,14 @@ public class ReportController {
     }
 
     @GetMapping("/maintenance-summary")
-    @PreAuthorize("hasAnyRole('MANAGER', 'COORDINATOR')")
+    @PreAuthorize("hasAnyRole('APARTMENT_MANAGER', 'MAINTENANCE_COORDINATOR')")
     public List<MaintenanceSummaryDTO> getMaintenanceSummary(
             @RequestParam String groupBy) {
         return reportService.getMaintenanceSummary(groupBy);
     }
 
     @GetMapping("/facility-utilization")
-    @PreAuthorize("hasAnyRole('MANAGER', 'COORDINATOR')")
+    @PreAuthorize("hasAnyRole('APARTMENT_MANAGER', 'MAINTENANCE_COORDINATOR')")
     public List<FacilityUtilizationDTO> getFacilityUtilization(
             @RequestParam LocalDate from,
             @RequestParam LocalDate to) {

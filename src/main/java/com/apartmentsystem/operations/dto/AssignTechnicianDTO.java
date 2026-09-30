@@ -12,5 +12,5 @@ public class AssignTechnicianDTO {
             description = "ID of the technician to assign to the work order",
             example = "25"
     )
-    private Long technicianUserId;
+    private String technicianUserId;
 }

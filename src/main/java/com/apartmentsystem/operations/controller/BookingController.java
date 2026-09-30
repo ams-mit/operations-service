@@ -21,7 +21,7 @@ public class BookingController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER')")
+    @PreAuthorize("hasAnyRole('TENANT_RESIDENT', 'OWNER')")
     public BookingResponseDTO createBooking(
             @RequestBody CreateBookingDTO dto) {
 
@@ -29,7 +29,7 @@ public class BookingController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER', 'MANAGER', 'COORDINATOR')")
+    @PreAuthorize("hasAnyRole('TENANT_RESIDENT', 'OWNER', 'APARTMENT_MANAGER', 'MAINTENANCE_COORDINATOR')")
     public List<BookingResponseDTO> getAllBookings(
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size) {
@@ -39,7 +39,7 @@ public class BookingController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER', 'MANAGER', 'COORDINATOR')")
+    @PreAuthorize("hasAnyRole('TENANT_RESIDENT', 'OWNER', 'APARTMENT_MANAGER', 'MAINTENANCE_COORDINATOR')")
     public BookingResponseDTO getBookingById(
             @PathVariable Long id) {
 
@@ -47,7 +47,7 @@ public class BookingController {
     }
 
     @PatchMapping("/{id}/decision")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('APARTMENT_MANAGER')")
     public BookingResponseDTO decideBooking(
             @PathVariable Long id,
             @RequestBody BookingDecisionDTO dto) {
@@ -61,10 +61,10 @@ public class BookingController {
     }
 
     @PostMapping("/{id}/cancel")
-    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('TENANT_RESIDENT', 'OWNER', 'APARTMENT_MANAGER')")
     public BookingResponseDTO cancelBooking(
             @PathVariable Long id,
-            @RequestParam(required = false) Long userId) {
+            @RequestParam(required = false) String userId) {
 
         return bookingService.cancelBooking(id, userId);
     }

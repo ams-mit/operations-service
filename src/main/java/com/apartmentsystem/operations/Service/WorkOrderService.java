@@ -89,8 +89,8 @@ public class WorkOrderService {
     }
 
     public List<WorkOrderResponseDTO> getWorkOrders(
-            Long technicianId, WorkOrderStatus status, Pageable pageable) {
-        Long scopedTechnicianId = CurrentUser.hasRole("TECHNICIAN")
+            String technicianId, WorkOrderStatus status, Pageable pageable) {
+        String scopedTechnicianId = CurrentUser.hasRole("TECHNICIAN")
                 ? CurrentUser.id() : technicianId;
         return workOrderRepository.findFiltered(scopedTechnicianId, status, pageable)
                 .map(this::convertToResponseDTO).toList();
@@ -205,7 +205,7 @@ public class WorkOrderService {
     // Assign or reassign a technician
     public WorkOrderResponseDTO assignTechnician(
             Long orderId,
-            Long technicianUserId) {
+            String technicianUserId) {
 
         WorkOrder workOrder =
                 workOrderRepository.findById(orderId)

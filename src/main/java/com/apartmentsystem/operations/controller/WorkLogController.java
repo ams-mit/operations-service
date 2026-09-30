@@ -30,7 +30,7 @@ public class WorkLogController {
     }
 
     @GetMapping("/{workOrderId}/logs")
-    @PreAuthorize("hasAnyRole('TECHNICIAN', 'COORDINATOR', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('TECHNICIAN', 'MAINTENANCE_COORDINATOR', 'APARTMENT_MANAGER')")
     public List<WorkLogEntry> getWorkLogs(
             @PathVariable Long workOrderId) {
 

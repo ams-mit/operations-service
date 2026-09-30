@@ -18,7 +18,7 @@ public class WorkOrder {
 
     private Long maintenanceRequestId;
 
-    private Long assignedTechnicianUserId;
+    private String assignedTechnicianUserId;
 
     private LocalDate scheduledDate;
 

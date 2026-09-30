@@ -14,7 +14,7 @@ public interface WorkOrderRepository
     @Query("select w from WorkOrder w where " +
             "(:technicianId is null or w.assignedTechnicianUserId = :technicianId) and " +
             "(:status is null or w.status = :status)")
-    Page<WorkOrder> findFiltered(@Param("technicianId") Long technicianId,
+    Page<WorkOrder> findFiltered(@Param("technicianId") String technicianId,
                                  @Param("status") WorkOrderStatus status,
                                  Pageable pageable);
 }

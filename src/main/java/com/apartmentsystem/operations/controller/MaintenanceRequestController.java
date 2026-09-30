@@ -40,7 +40,7 @@ public class MaintenanceRequestController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
-    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER')")
+    @PreAuthorize("hasAnyRole('TENANT_RESIDENT', 'OWNER')")
     public MaintenanceRequestResponseDTO createRequest(
             @RequestBody CreateMaintenanceRequestDTO dto) {
 
@@ -60,7 +60,7 @@ public class MaintenanceRequestController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
-    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER', 'COORDINATOR', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('TENANT_RESIDENT', 'OWNER', 'MAINTENANCE_COORDINATOR', 'APARTMENT_MANAGER')")
     public List<MaintenanceRequestResponseDTO> getAllRequests(
             @RequestParam(required = false) MaintenanceRequestStatus status,
             @RequestParam(required = false) String priority,
@@ -88,7 +88,7 @@ public class MaintenanceRequestController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER', 'COORDINATOR', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('TENANT_RESIDENT', 'OWNER', 'MAINTENANCE_COORDINATOR', 'APARTMENT_MANAGER')")
     public MaintenanceRequestResponseDTO getRequestById(
             @PathVariable Long id) {
 
@@ -110,7 +110,7 @@ public class MaintenanceRequestController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('COORDINATOR', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('MAINTENANCE_COORDINATOR', 'APARTMENT_MANAGER')")
     public MaintenanceRequestResponseDTO updateStatus(
             @PathVariable Long id,
             @RequestBody UpdateMaintenanceRequestStatusDTO dto) {
@@ -131,7 +131,7 @@ public class MaintenanceRequestController {
             @ApiResponse(responseCode = "409", description = "Request cannot be cancelled in its current status")
     })
     @PostMapping("/{id}/cancel")
-    @PreAuthorize("hasAnyRole('RESIDENT', 'OWNER')")
+    @PreAuthorize("hasAnyRole('TENANT_RESIDENT', 'OWNER')")
     public MaintenanceRequestResponseDTO cancelRequest(
             @PathVariable Long id) {
 

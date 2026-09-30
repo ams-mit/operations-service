@@ -46,7 +46,7 @@ class ListPaginationServiceTest {
     void paginatedWorkOrdersBookingsAndFacilitiesReturnOnlyPageContent() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("1", "",
-                        List.of(new SimpleGrantedAuthority("ROLE_MANAGER"))));
+                        List.of(new SimpleGrantedAuthority("ROLE_APARTMENT_MANAGER"))));
         var pageable = PageRequest.of(0, 1);
         WorkOrder order = new WorkOrder(); order.setId(11L);
         Booking booking = new Booking(); booking.setId(12L);

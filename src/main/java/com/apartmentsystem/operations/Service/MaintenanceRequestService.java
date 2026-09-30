@@ -45,7 +45,7 @@ public class MaintenanceRequestService {
         request.setAttachmentUrl(dto.getAttachmentUrl());
 
         // Get the currently authenticated user's ID
-        Long currentUserId = CurrentUser.id();
+        String currentUserId = CurrentUser.id();
         request.setRequestedByUserId(currentUserId);
 
         // System-controlled fields
@@ -77,7 +77,7 @@ public class MaintenanceRequestService {
                                 new RuntimeException(
                                         "Maintenance request not found"));
 
-        if (CurrentUser.hasAnyRole("RESIDENT", "OWNER")
+        if (CurrentUser.hasAnyRole("TENANT_RESIDENT", "OWNER")
                 && !CurrentUser.id().equals(request.getRequestedByUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "You are not allowed to access this maintenance request");
@@ -96,7 +96,7 @@ public class MaintenanceRequestService {
     public List<MaintenanceRequestResponseDTO> getFilteredRequests(
             MaintenanceRequestStatus status, String priority, String category,
             Pageable pageable) {
-        Long requesterId = CurrentUser.hasAnyRole("RESIDENT", "OWNER") ? CurrentUser.id() : null;
+        String requesterId = CurrentUser.hasAnyRole("TENANT_RESIDENT", "OWNER") ? CurrentUser.id() : null;
         return maintenanceRequestRepository.findFiltered(status, priority, category, requesterId, pageable)
                 .map(this::convertToResponseDTO).toList();
     }
@@ -159,7 +159,7 @@ public class MaintenanceRequestService {
                                         "Maintenance request not found"));
 
         // Get the currently authenticated user
-        Long currentUserId = CurrentUser.id();
+        String currentUserId = CurrentUser.id();
 
         // Only the person who created the request can cancel it
         if (!currentUserId.equals(request.getRequestedByUserId())) {
