@@ -91,10 +91,3 @@ jobs:
           resourceGroup: ${{ vars.RESOURCE_GROUP }}
           containerAppName: ${{ vars.CONTAINER_APP_NAME }}
           imageToDeploy: ${{ vars.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          environmentVariables: >
-            SPRING_PROFILES_ACTIVE=prod
-            SPRING_DATASOURCE_URL=jdbc:mysql://operations-mysql-server.mysql.database.azure.com:3306/operations_db?sslMode=REQUIRED
-            SPRING_DATASOURCE_USERNAME=operationsadmin
-            SPRING_DATASOURCE_PASSWORD=secretref:spring-datasource-password
-            SERVICE_JWT_PRIVATE_KEY=secretref:service-jwt-private-key
-            GATEWAY_JWT_PUBLIC_KEY=secretref:gateway-jwt-public-key
