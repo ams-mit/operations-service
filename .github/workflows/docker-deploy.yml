@@ -90,7 +90,7 @@ jobs:
         with:
           resourceGroup: ${{ vars.RESOURCE_GROUP }}
           containerAppName: ${{ vars.CONTAINER_APP_NAME }}
-          imageToDeploy: ${{ needs.build-and-push.outputs.image_tag }}
+          imageToDeploy: ${{ vars.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           environmentVariables: >
             SPRING_PROFILES_ACTIVE=prod
             SPRING_DATASOURCE_URL=jdbc:mysql://operations-mysql-server.mysql.database.azure.com:3306/operations_db?sslMode=REQUIRED
