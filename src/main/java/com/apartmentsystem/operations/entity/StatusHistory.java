@@ -24,6 +24,7 @@ public class StatusHistory {
     @Enumerated(EnumType.STRING)
     private MaintenanceRequestStatus newStatus;
 
+    @Column(name = "changed_by_user_id", length = 36)
     private String changedByUserId;
 
     private LocalDateTime changedAt;

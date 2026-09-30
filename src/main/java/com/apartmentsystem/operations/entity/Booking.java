@@ -18,6 +18,7 @@ public class Booking {
 
     private Long facilityId;
 
+    @Column(name = "requested_by_user_id", length = 36)
     private String requestedByUserId;
 
     private Long unitId;
@@ -33,6 +34,7 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
 
+    @Column(name = "decided_by_user_id", length = 36)
     private String decidedByUserId;
 
     private String decisionNote;

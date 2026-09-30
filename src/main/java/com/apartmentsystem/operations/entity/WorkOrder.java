@@ -18,6 +18,7 @@ public class WorkOrder {
 
     private Long maintenanceRequestId;
 
+    @Column(name = "assigned_technician_user_id", length = 36)
     private String assignedTechnicianUserId;
 
     private LocalDate scheduledDate;

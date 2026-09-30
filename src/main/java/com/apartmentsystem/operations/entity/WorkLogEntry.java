@@ -23,6 +23,7 @@ public class WorkLogEntry {
 
     private Long workOrderId;
 
+    @Column(name = "technician_id", length = 36)
     private String technicianId;
 
     @Column(nullable = false)
