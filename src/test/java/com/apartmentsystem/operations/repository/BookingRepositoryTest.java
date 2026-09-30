@@ -24,7 +24,7 @@ class BookingRepositoryTest {
         Booking existingBooking = new Booking();
 
         existingBooking.setFacilityId(1L);
-        existingBooking.setRequestedByUserId(100L);
+        existingBooking.setRequestedByUserId("uuid-100");
         existingBooking.setUnitId(10L);
         existingBooking.setStartTime(
                 LocalDateTime.of(2026, 10, 1, 10, 0)
@@ -58,7 +58,7 @@ class BookingRepositoryTest {
         Booking existingBooking = new Booking();
 
         existingBooking.setFacilityId(1L);
-        existingBooking.setRequestedByUserId(100L);
+        existingBooking.setRequestedByUserId("uuid-100");
         existingBooking.setUnitId(10L);
         existingBooking.setStartTime(
                 LocalDateTime.of(2026, 10, 1, 10, 0)

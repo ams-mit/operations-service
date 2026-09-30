@@ -24,7 +24,7 @@ public class MaintenanceRequest {
 
     private Long unitId;
 
-    private Long requestedByUserId;
+    private String requestedByUserId;
 
     private String category;
 

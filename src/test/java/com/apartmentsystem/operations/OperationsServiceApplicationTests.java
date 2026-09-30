@@ -31,7 +31,7 @@ class OperationsServiceApplicationTests {
         Booking booking = new Booking();
 
         booking.setFacilityId(999L);
-        booking.setRequestedByUserId(999L);
+        booking.setRequestedByUserId("uuid-999");
         booking.setUnitId(999L);
 
         booking.setStartTime(

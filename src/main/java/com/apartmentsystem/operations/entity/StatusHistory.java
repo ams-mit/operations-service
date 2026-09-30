@@ -24,7 +24,7 @@ public class StatusHistory {
     @Enumerated(EnumType.STRING)
     private MaintenanceRequestStatus newStatus;
 
-    private Long changedByUserId;
+    private String changedByUserId;
 
     private LocalDateTime changedAt;
 }

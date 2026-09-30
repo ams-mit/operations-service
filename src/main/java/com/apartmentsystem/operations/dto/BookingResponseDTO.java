@@ -14,7 +14,7 @@ public class BookingResponseDTO {
 
     private Long facilityId;
 
-    private Long requestedByUserId;
+    private String requestedByUserId;
 
     private Long unitId;
 
@@ -28,7 +28,7 @@ public class BookingResponseDTO {
 
     private BookingStatus status;
 
-    private Long decidedByUserId;
+    private String decidedByUserId;
 
     private String decisionNote;
 

@@ -13,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    Page<Booking> findByRequestedByUserId(Long requestedByUserId, Pageable pageable);
+    Page<Booking> findByRequestedByUserId(String requestedByUserId, Pageable pageable);
 
     List<Booking> findByFacilityIdAndStartTimeLessThanAndEndTimeGreaterThanAndStatus(
             Long facilityId,

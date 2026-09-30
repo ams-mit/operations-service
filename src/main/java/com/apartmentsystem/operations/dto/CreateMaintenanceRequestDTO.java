@@ -12,7 +12,7 @@ public class CreateMaintenanceRequestDTO {
     private Long unitId;
 
     @Schema(description = "ID of the user submitting the request", example = "42")
-    private Long requestedByUserId;
+    private String requestedByUserId;
 
     @Schema(description = "Category of the maintenance issue", example = "PLUMBING")
     private String category;

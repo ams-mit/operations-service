@@ -11,7 +11,7 @@ public class CreateBookingDTO {
 
     private Long facilityId;
 
-    private Long requestedByUserId;
+    private String requestedByUserId;
 
     private Long unitId;
 

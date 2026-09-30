@@ -23,7 +23,7 @@ public class WorkLogEntry {
 
     private Long workOrderId;
 
-    private Long technicianId;
+    private String technicianId;
 
     @Column(nullable = false)
     private String note;

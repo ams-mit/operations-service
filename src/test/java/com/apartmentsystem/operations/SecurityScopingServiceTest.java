@@ -42,20 +42,20 @@ class SecurityScopingServiceTest {
 
     @Test
     void residentMaintenanceListIsFilteredToJwtRequesterId() {
-        authenticate("101", "RESIDENT");
-        when(maintenanceRepository.findFiltered(null, null, null, 101L, Pageable.unpaged()))
+        authenticate("uuid-101", "TENANT_RESIDENT");
+        when(maintenanceRepository.findFiltered(null, null, null, "uuid-101", Pageable.unpaged()))
                 .thenReturn(new PageImpl<>(List.of()));
         new MaintenanceRequestService(maintenanceRepository, statusHistoryRepository)
                 .getFilteredRequests(null, null, null, Pageable.unpaged());
-        verify(maintenanceRepository).findFiltered(null, null, null, 101L, Pageable.unpaged());
+        verify(maintenanceRepository).findFiltered(null, null, null, "uuid-101", Pageable.unpaged());
     }
 
     @Test
     void residentCannotReadAnotherRequestersMaintenanceRequest() {
-        authenticate("101", "RESIDENT");
+        authenticate("uuid-101", "TENANT_RESIDENT");
         MaintenanceRequest otherResidentRequest = new MaintenanceRequest();
         otherResidentRequest.setId(2L);
-        otherResidentRequest.setRequestedByUserId(202L);
+        otherResidentRequest.setRequestedByUserId("uuid-202");
         when(maintenanceRepository.findById(2L)).thenReturn(Optional.of(otherResidentRequest));
         assertThrows(ResponseStatusException.class,
                 () -> new MaintenanceRequestService(maintenanceRepository, statusHistoryRepository)
@@ -64,17 +64,17 @@ class SecurityScopingServiceTest {
 
     @Test
     void technicianIdFilterCannotOverrideJwtIdentity() {
-        authenticate("101", "TECHNICIAN");
-        when(workOrderRepository.findFiltered(101L, WorkOrderStatus.ASSIGNED, Pageable.unpaged()))
+        authenticate("uuid-101", "TECHNICIAN");
+        when(workOrderRepository.findFiltered("uuid-101", WorkOrderStatus.ASSIGNED, Pageable.unpaged()))
                 .thenReturn(new PageImpl<>(List.of()));
         new WorkOrderService(workOrderRepository, maintenanceRepository)
-                .getWorkOrders(202L, WorkOrderStatus.ASSIGNED, Pageable.unpaged());
-        verify(workOrderRepository).findFiltered(101L, WorkOrderStatus.ASSIGNED, Pageable.unpaged());
+                .getWorkOrders("uuid-202", WorkOrderStatus.ASSIGNED, Pageable.unpaged());
+        verify(workOrderRepository).findFiltered("uuid-101", WorkOrderStatus.ASSIGNED, Pageable.unpaged());
     }
 
     @Test
     void bookingRequesterIsTakenFromJwtRatherThanRequestBody() {
-        authenticate("101", "RESIDENT");
+        authenticate("uuid-101", "TENANT_RESIDENT");
         Facility facility = new Facility();
         facility.setId(5L);
         facility.setStatus(FacilityStatus.ACTIVE);
@@ -83,7 +83,7 @@ class SecurityScopingServiceTest {
 
         CreateBookingDTO dto = new CreateBookingDTO();
         dto.setFacilityId(5L);
-        dto.setRequestedByUserId(202L);
+        dto.setRequestedByUserId("uuid-202");
         dto.setStartTime(LocalDateTime.of(2026, 10, 1, 10, 0));
         dto.setEndTime(LocalDateTime.of(2026, 10, 1, 11, 0));
         dto.setGuestCount(1);
@@ -91,7 +91,7 @@ class SecurityScopingServiceTest {
 
         ArgumentCaptor<Booking> saved = ArgumentCaptor.forClass(Booking.class);
         verify(bookingRepository).save(saved.capture());
-        assertEquals(101L, saved.getValue().getRequestedByUserId());
+        assertEquals("uuid-101", saved.getValue().getRequestedByUserId());
     }
 
     private void authenticate(String userId, String role) {

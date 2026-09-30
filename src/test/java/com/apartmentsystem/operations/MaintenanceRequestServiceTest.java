@@ -44,7 +44,7 @@ class MaintenanceRequestServiceTest {
 
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("1", null,
-                        java.util.List.of(new SimpleGrantedAuthority("ROLE_COORDINATOR")))
+                        java.util.List.of(new SimpleGrantedAuthority("ROLE_MAINTENANCE_COORDINATOR")))
         );
 
         MaintenanceRequest request = new MaintenanceRequest();

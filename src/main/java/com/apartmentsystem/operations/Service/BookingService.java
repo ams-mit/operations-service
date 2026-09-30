@@ -115,11 +115,11 @@ public class BookingService {
     }
 
     public List<BookingResponseDTO> getAllBookings() {
-        if (CurrentUser.hasAnyRole("RESIDENT", "OWNER")) {
+        if (CurrentUser.hasAnyRole("TENANT_RESIDENT", "OWNER")) {
             return bookingRepository.findByRequestedByUserId(CurrentUser.id(), Pageable.unpaged())
                     .map(this::convertToResponseDTO).toList();
         }
-        if (!CurrentUser.hasAnyRole("MANAGER", "COORDINATOR")) {
+        if (!CurrentUser.hasAnyRole("APARTMENT_MANAGER", "MAINTENANCE_COORDINATOR")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to view bookings");
         }
         return bookingRepository.findAll()
@@ -129,11 +129,11 @@ public class BookingService {
     }
 
     public List<BookingResponseDTO> getAllBookings(Pageable pageable) {
-        if (CurrentUser.hasAnyRole("RESIDENT", "OWNER")) {
+        if (CurrentUser.hasAnyRole("TENANT_RESIDENT", "OWNER")) {
             return bookingRepository.findByRequestedByUserId(CurrentUser.id(), pageable)
                     .map(this::convertToResponseDTO).toList();
         }
-        if (!CurrentUser.hasAnyRole("MANAGER", "COORDINATOR")) {
+        if (!CurrentUser.hasAnyRole("APARTMENT_MANAGER", "MAINTENANCE_COORDINATOR")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to view bookings");
         }
         return bookingRepository.findAll(pageable)
@@ -156,7 +156,7 @@ public class BookingService {
             Long id,
             String decision,
             String note,
-            Long decidedByUserId) {
+            String decidedByUserId) {
 
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() ->
@@ -210,7 +210,7 @@ public class BookingService {
     // Cancel booking
     public BookingResponseDTO cancelBooking(
             Long id,
-            Long userId) {
+            String userId) {
 
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() ->
@@ -223,8 +223,8 @@ public class BookingService {
                     "Only pending or approved bookings can be cancelled");
         }
 
-        Long currentUserId = CurrentUser.id();
-        if (!CurrentUser.hasRole("MANAGER") && booking.getRequestedByUserId() != null
+        String currentUserId = CurrentUser.id();
+        if (!CurrentUser.hasRole("APARTMENT_MANAGER") && booking.getRequestedByUserId() != null
                 && !booking.getRequestedByUserId().equals(currentUserId)) {
 
             throw new RuntimeException(
@@ -241,12 +241,12 @@ public class BookingService {
     }
 
     private void assertCanAccessBooking(Booking booking) {
-        if (CurrentUser.hasAnyRole("RESIDENT", "OWNER")
+        if (CurrentUser.hasAnyRole("TENANT_RESIDENT", "OWNER")
                 && !CurrentUser.id().equals(booking.getRequestedByUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "You are not allowed to access this booking");
         }
-        if (!CurrentUser.hasAnyRole("RESIDENT", "OWNER", "MANAGER", "COORDINATOR")) {
+        if (!CurrentUser.hasAnyRole("TENANT_RESIDENT", "OWNER", "APARTMENT_MANAGER", "MAINTENANCE_COORDINATOR")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to view bookings");
         }
     }

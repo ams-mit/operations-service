@@ -11,5 +11,5 @@ public class BookingDecisionDTO {
 
     private String note;
 
-    private Long decidedByUserId;
+    private String decidedByUserId;
 }

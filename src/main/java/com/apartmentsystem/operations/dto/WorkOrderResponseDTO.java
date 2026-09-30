@@ -27,7 +27,7 @@ public class WorkOrderResponseDTO {
             description = "ID of the technician assigned to the work order",
             example = "25"
     )
-    private Long assignedTechnicianUserId;
+    private String assignedTechnicianUserId;
 
     @Schema(
             description = "Date scheduled for the work order",

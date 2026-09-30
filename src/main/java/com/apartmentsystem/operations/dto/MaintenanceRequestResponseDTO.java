@@ -18,7 +18,7 @@ public class MaintenanceRequestResponseDTO {
     private Long unitId;
 
     @Schema(description = "ID of the user who submitted the request", example = "42")
-    private Long requestedByUserId;
+    private String requestedByUserId;
 
     @Schema(description = "URL of an attachment related to the maintenance issue", example = "https://example.com/image.jpg")
     private String attachmentUrl;

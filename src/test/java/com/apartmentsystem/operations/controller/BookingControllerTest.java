@@ -38,7 +38,7 @@ class BookingControllerTest {
 
 
     @Test
-    @WithMockUser(username = "10", roles = "RESIDENT")
+    @WithMockUser(username = "10", roles = "TENANT_RESIDENT")
     void createBooking_shouldReturnOk() throws Exception {
 
         BookingResponseDTO response = new BookingResponseDTO();
@@ -65,7 +65,7 @@ class BookingControllerTest {
 
 
     @Test
-    @WithMockUser(username = "10", roles = "RESIDENT")
+    @WithMockUser(username = "10", roles = "TENANT_RESIDENT")
     void getAllBookings_shouldReturnOk() throws Exception {
 
         when(bookingService.getAllBookings())
@@ -79,7 +79,7 @@ class BookingControllerTest {
 
 
     @Test
-    @WithMockUser(username = "10", roles = "RESIDENT")
+    @WithMockUser(username = "10", roles = "TENANT_RESIDENT")
     void getAllBookings_withPagination_shouldReturnOk() throws Exception {
 
         when(bookingService.getAllBookings(any()))
@@ -95,7 +95,7 @@ class BookingControllerTest {
 
 
     @Test
-    @WithMockUser(username = "10", roles = "RESIDENT")
+    @WithMockUser(username = "10", roles = "TENANT_RESIDENT")
     void getBookingById_shouldReturnOk() throws Exception {
 
         BookingResponseDTO response = new BookingResponseDTO();
@@ -111,7 +111,7 @@ class BookingControllerTest {
 
 
     @Test
-    @WithMockUser(username = "10", roles = "MANAGER")
+    @WithMockUser(username = "10", roles = "APARTMENT_MANAGER")
     void decideBooking_shouldReturnOk() throws Exception {
 
         BookingResponseDTO response = new BookingResponseDTO();
@@ -120,7 +120,7 @@ class BookingControllerTest {
                 eq(1L),
                 eq("APPROVED"),
                 eq("Approved by manager"),
-                eq(10L)
+                eq("10")
         )).thenReturn(response);
 
         mockMvc.perform(
@@ -139,12 +139,12 @@ class BookingControllerTest {
 
 
     @Test
-    @WithMockUser(username = "10", roles = "RESIDENT")
+    @WithMockUser(username = "10", roles = "TENANT_RESIDENT")
     void cancelBooking_shouldReturnOk() throws Exception {
 
         BookingResponseDTO response = new BookingResponseDTO();
 
-        when(bookingService.cancelBooking(1L, 10L))
+        when(bookingService.cancelBooking(1L, "10"))
                 .thenReturn(response);
 
         mockMvc.perform(
